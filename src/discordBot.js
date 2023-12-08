@@ -70,7 +70,7 @@ export const sendToChannel = (restaurantName, users, uploadUser) => {
 
 export const batchSendToUsers = (restaurantName, users, uploadUser) => {
     const channelId = process.env.DISCORD_CHANNEL_ID
-    const foodOrderUrl = process.env.FOOD_ORDER_URL
+    const foodOrderUrl = process.env.FOOD_ORDER_PAY_URL
 
     const channel = client.channels.cache.get(channelId)
     if (!channel) {
@@ -102,6 +102,32 @@ export const batchSendToUsers = (restaurantName, users, uploadUser) => {
                 })
             }
         }
+    }
+}
+
+export const noticeUserCompleteBill = (restaurantName, uploadUsername) => {
+    const channelId = process.env.DISCORD_CHANNEL_ID
+    const foodOrderMyBillUrl = process.env.FOOD_ODDER_MYBILL_URL
+
+    const channel = client.channels.cache.get(channelId)
+    if (!channel) {
+        log(chalk.red('Channel not found'))
+        return
+    }
+
+    const guildMember = retrieveMemberByUsername(channel, uploadUsername)
+    if (guildMember) {
+        const title = `Seems like every target users had paid for ${restaurantName}, go ahead and check if the amount is correct!`
+        const embed = new EmbedBuilder()
+            .setTitle('FOS - Food Order System')
+            .setDescription('Click this url to complete your bill!')
+            .setColor('#0000ff')
+            .setURL(foodOrderMyBillUrl)
+
+        guildMember.user.send({
+            embeds: [embed],
+            content: title,
+        })
     }
 }
 

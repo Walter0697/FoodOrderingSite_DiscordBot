@@ -1,11 +1,11 @@
 import express from 'express'
-import discordClient, { sendToChannel, batchSendToUsers } from './discordBot.js'
+import {
+    sendToChannel,
+    batchSendToUsers,
+    noticeUserCompleteBill,
+} from './discordBot.js'
 
 const router = express.Router()
-
-// should recieve restaurant name
-// array of people with username and link for payment
-// displayname of the person who uploaded the bill (don't tag)
 
 router.post('/bill_uploaded', (req, res, next) => {
     try {
@@ -24,6 +24,25 @@ router.post('/bill_uploaded', (req, res, next) => {
 
         sendToChannel(body.restaurant, body.users, body.uploadUser)
         batchSendToUsers(body.restaurant, body.users, body.uploadUser)
+
+        res.json('ok')
+    } catch (err) {
+        next(err)
+    }
+})
+
+router.post('/bill_complete', (req, res, next) => {
+    try {
+        const { body } = req
+        if (!body.restaurant) {
+            throw new Error('restaurant name is required')
+        }
+
+        if (!body.uploadUsername) {
+            throw new Error('users is required')
+        }
+
+        noticeUserCompleteBill(body.restaurant, body.uploadUsername)
 
         res.json('ok')
     } catch (err) {
